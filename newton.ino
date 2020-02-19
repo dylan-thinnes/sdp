@@ -1,54 +1,80 @@
-/* FSR testing sketch. 
- 
-Connect one end of FSR to power, the other end to Analog 0.
-Then connect one end of a 10K resistor from Analog 0 to ground 
- 
-For more information see www.ladyada.net/learn/sensors/fsr.html */
- 
-int fsrPin = 0;     // the FSR and 10K pulldown are connected to a0
-int fsrReading;     // the analog reading from the FSR resistor divider
-int fsrVoltage;     // the analog reading converted to voltage
-unsigned long fsrResistance;  // The voltage converted to resistance, can be very big so make "long"
-unsigned long fsrConductance; 
-long fsrForce;       // Finally, the resistance converted to force
- 
+/*Program name: send sensor value to raspberry PI
+ *1,Wiring instructions:  
+ *  Arduino 5v(3v3) --> firstFSR one_of_the_leads
+ *  Arduino A0      --> firstFSR another_leads
+ *  Arduino 5v(3v3) --> sencondFSR one_of_the_leads
+ *  Arduino A5      --> sencondFSR one_of_the_leads
+ *  Arduino USB     --> raspberryPI USB
+ * 2,Used libraries: none
+ * 3,Program results:
+ *  open the serial monitor, you will see KxxxxxxxxC is printing circularly(x represents a number)
+ */
+#define fsrPin  A0      // the FSR and 10K pulldown are connected to A0
+#define secPin  A5      // the SEC and 10K pulldown are connected to A5
+int fsrSensorVal = 9;   // the FSR analog Value
+int secSensorVal = 9;   // the SEC analog Value
+int mappedFsrSensorVal = 9;   // the mapped FSR analog Value
+int mappedSecSensorVal = 9;   // the mapped SEC analog Value
+int State = 0;
+
+void makeUp(int data);
 void setup(void) {
-  Serial.begin(9600);   // We'll send debugging information via the Serial monitor
+// Setting the baundrate as 9600
+// We'll send debugging information via the Serial monitor and communicate with the raspberry PI  
+  Serial.begin(9600);   
 }
- 
+
 void loop(void) {
-   if(Serial.available()){
-    if('a'==Serial.read())
-    
-  fsrReading = analogRead(fsrPin);  
- 
-  // analog voltage reading ranges from about 0 to 1023 which maps to 0V to 5V (= 5000mV)
-  fsrVoltage = map(fsrReading, 0, 1023, 0, 5000);
- 
-  if (fsrVoltage == 0) {
-  } else {
-    // The voltage = Vcc * R / (R + FSR) where R = 10K and Vcc = 5V
-    // so FSR = ((Vcc - V) * R) / V        yay math!
-    fsrResistance = 5000 - fsrVoltage;     // fsrVoltage is in millivolts so 5V = 5000mV
-    fsrResistance *= 10000;                // 10K resistor
-    fsrResistance /= fsrVoltage;
- 
-    fsrConductance = 1000000;           // we measure in micromhos so 
-    fsrConductance /= fsrResistance;
- 
-    // Use the two FSR guide graphs to approximate the force
-    if (fsrConductance <= 1000) {
-      fsrForce = fsrConductance / 80;
-      
-      Serial.println(fsrForce);      
-    } else {
-      fsrForce = fsrConductance - 1000;
-      fsrForce /= 30;
-   
-      Serial.println(fsrForce);            
+  if(State == 0){
+    if(Serial.available()){
+      if(Serial.read() == 'S'){      
+         State = 1;
+      }
     }
   }
-  Serial.println("--------------------");}
- 
-  delay(1000);
+  if(State == 1){
+    //Data start symbol with 'K'
+    Serial.print('K');
+    
+    //read the first sensor value
+    fsrSensorVal = analogRead(fsrPin);
+    //map the read value to [0,5000], as voltage(unit: mv)
+    mappedFsrSensorVal = map(fsrSensorVal, 0, 1023, 0, 5000);
+    //send the value to raspberryPI  
+    makeUpAndSend(mappedFsrSensorVal);
+
+    //read the second sensor value
+    secSensorVal = analogRead(secPin);
+    //map the read value to [0,5000], as voltage(unit: mv)
+    mappedFsrSensorVal = map(secSensorVal, 0, 1023, 0, 5000);   
+    //send the value to raspberryPI
+    makeUpAndSend(mappedFsrSensorVal);
+    
+    //Data termination symbol with "/n"
+    Serial.println('C');                               
+    delay(400);     
+  }
+  delay(100);
+}
+
+//To make the raspberry PI read data easily,we complete the sensor value with '0' as four digits and then send it to raspberry PI
+void makeUpAndSend(int data){
+  if(data < 10){
+    Serial.print(0);
+    Serial.print(0);
+    Serial.print(0); 
+    Serial.print(data);     
+  }
+  else if(data < 100){
+    Serial.print(0);
+    Serial.print(0); 
+    Serial.print(data);     
+  }
+  else if(data < 1000){
+    Serial.print(0);
+    Serial.print(data);     
+  }
+  else{ 
+    Serial.print(data);     
+  }
 }

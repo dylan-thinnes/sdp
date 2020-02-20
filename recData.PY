@@ -1,9 +1,8 @@
-# -*- coding: utf-8 -*-#
+
 import serial
 import time
 
-#ser = serial.Serial('/dev/ttyACM2', 9600, timeout=1)  # debug for Linux serial
-ser = serial.Serial('COM3', 9600, timeout=1)             # debug for windows serial
+ser = serial.Serial('/dev/ttyACM2', 9600, timeout=1)  
 S = 'S'  # arduino start sign
 
 

@@ -1,0 +1,9 @@
+#!/bin/bash
+echo "Please give your s1****** username:"
+read user
+echo "You will now need to enter your password twice:"
+
+echo "First time:"
+ssh "$user@student.ssh.inf.ed.ac.uk" "wget $1 -O ~/downloadtmp" \
+    && echo "Second time:" \
+    && scp "$user@student.ssh.inf.ed.ac.uk:~/downloadtmp" "$2"

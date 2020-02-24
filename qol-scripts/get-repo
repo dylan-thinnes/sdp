@@ -1,0 +1,2 @@
+#!/bin/bash
+(cd /home/pi && download https://github.com/dylan-thinnes/sdp/archive/master.zip sdp.zip && unzip -o sdp.zip)

@@ -1,0 +1,5 @@
+#!/bin/bash
+python readTTY.py | while read line; do
+    echo "$line" > tty_last_result
+    echo "$line" >> tty_all_results
+done

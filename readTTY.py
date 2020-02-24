@@ -1,8 +1,9 @@
 import serial
 import time
 import sys
+import glob
 
-ser = serial.Serial(sys.argv[0], 9600, timeout=1)  
+ser = serial.Serial(glob.glob("/dev/ttyACM?")[0], 9600, timeout=1)  
 
 # send start sign to Arduino
 for i in range(1, 4):
@@ -17,6 +18,8 @@ try:
             fst = int(hear[1:5])  # from 2nd to 4th is first value
             snd = int(hear[5:9])  # from 5th to 8th is second value
             print("%i %i %f" % (fst, snd, time.time())
+            sys.stdout.flush()
+            sys.stderr.flush()
 
 except KeyboardInterrupt:
     print("Can't read TTY.")

@@ -13,13 +13,19 @@ for i in range(1, 4):
 # run main task
 try:
     while True:
-        hear = str(ser.readline().decode())
-        if hear.startswith('K'):  # when the head of received data is 'K', read frs and sec
-            fst = int(hear[1:5])  # from 2nd to 4th is first value
-            snd = int(hear[5:9])  # from 5th to 8th is second value
-            print("%i %i %f" % (fst, snd, time.time())
-            sys.stdout.flush()
-            sys.stderr.flush()
+        try:
+            hear = str(ser.readline().decode())
+        except UnicodeDecodeError:
+            continue
+
+        hear = hear.rstrip() # strip trailing whitespace
+        # when the head of received data is 'DATA', read frs and sec
+        if hear.startswith('DATA') and hear.endswith('END'):
+            sensors = [int(x) for x in hear.split(' ')[1:-1]] # print sensors
+            print ' '.join([str(x) for x in sensors])
+
+        sys.stdout.flush()
+        sys.stderr.flush()
 
 except KeyboardInterrupt:
     print("Can't read TTY.")

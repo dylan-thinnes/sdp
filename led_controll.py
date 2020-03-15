@@ -51,13 +51,13 @@ try:
 				GPIO.output(red_switch, True)
 				GPIO.output(green_switch, False)
 			if colour == 'blue':
-        GPIO.output(blue_switch, True)
-        GPIO.output(red_switch, False)
-        GPIO.output(green_switch, False)
+        			GPIO.output(blue_switch, True)
+        			GPIO.output(red_switch, False)
+        			GPIO.output(green_switch, False)
 			if colour == 'green':
-        GPIO.output(blue_switch, False)
-        GPIO.output(red_switch, False)
-        GPIO.output(green_switch, True)
+        			GPIO.output(blue_switch, False)
+       				GPIO.output(red_switch, False)
+        			GPIO.output(green_switch, True)
 
 		time.sleep(0.1)
 except Exception, e:
